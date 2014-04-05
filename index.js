@@ -28,11 +28,11 @@ _.extend(ES6ValidateFilter.prototype, {
     extensions: ['js'],
     targetExtension: 'js',
 
-    transform: function (srcDir, destDir) {
+    write: function (readTree, destDir) {
         var self = this;
 
         // Call the super which processes all files, then afterwards display any errors
-        return Filter.prototype.transform.apply(this, _.toArray(arguments))
+        return Filter.prototype.write.apply(this, _.toArray(arguments))
             .then(function () {
                 var errorsFound = BroccoliES6ModuleFile.getErrorsFromAnalyzedInfos(self.infos, self.options);
 
