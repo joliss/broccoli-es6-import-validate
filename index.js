@@ -21,6 +21,7 @@ function ES6ValidateFilter(inputTree, options) {
 
 // Inherit from Filter
 ES6ValidateFilter.prototype = Object.create(Filter.prototype);
+ES6ValidateFilter.prototype.constructor = ES6ValidateFilter;
 
 // Extend the inherited methods
 _.extend(ES6ValidateFilter.prototype, {
