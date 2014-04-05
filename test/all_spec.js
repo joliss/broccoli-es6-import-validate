@@ -3,9 +3,9 @@
 var path = require('path'),
     fs = require('fs'),
     rimraf = require('rimraf'),
-    broccoli = require('broccoli'),
     sinon = require('sinon'),
     should = require('should'),
+    Promise = require('rsvp').Promise,
     ES6ValidateFilter = require('../');
 
 describe('ES6ValidateFilter', function () {
@@ -26,8 +26,14 @@ describe('ES6ValidateFilter', function () {
         rimraf.sync(tmpPath);
     });
 
+    // Until we have a proper test harness
+    function readTree(s) {
+        // Supports only plain-string trees
+        return Promise.resolve(s);
+    }
+
     it('validates import statements with a whitelist', function (done) {
-        var tree = broccoli.makeTree('test/fixtures/regular');
+        var tree = 'test/fixtures/regular';
 
         var warnStub = sandbox.stub(console, 'warn');
 
@@ -38,9 +44,9 @@ describe('ES6ValidateFilter', function () {
         });
 
         should.exist(blah);
-        should.exist(blah.transform);
+        should.exist(blah.write);
 
-        blah.transform(path.join(__dirname, 'fixtures', 'regular'), path.join(__dirname, 'fixtures', 'temp')).then(function () {
+        blah.write(readTree, path.join(__dirname, 'fixtures', 'temp')).then(function () {
             warnStub.callCount.should.equal(3);
             warnStub.secondCall.args[0].should.containEql('baz');
             warnStub.secondCall.args[0].should.containEql('Cannot find "missing" export for "foo"');
@@ -54,7 +60,7 @@ describe('ES6ValidateFilter', function () {
     });
 
     it('validates import statements with renamed modules', function (done) {
-        var tree = broccoli.makeTree('test/fixtures/renamed');
+        var tree = 'test/fixtures/renamed';
 
         var warnStub = sandbox.stub(console, 'warn');
 
@@ -68,15 +74,15 @@ describe('ES6ValidateFilter', function () {
         });
 
         should.exist(blah);
-        should.exist(blah.transform);
+        should.exist(blah.write);
 
-        blah.transform(path.join(__dirname, 'fixtures', 'renamed'), path.join(__dirname, 'fixtures', 'temp')).then(function () {
+        blah.write(readTree, path.join(__dirname, 'fixtures', 'temp')).then(function () {
             warnStub.callCount.should.equal(3);
             warnStub.secondCall.args[0].should.containEql('appkit/baz');
             warnStub.secondCall.args[0].should.containEql('Cannot find "missing" export for "appkit/foo"');
             warnStub.thirdCall.args[0].should.containEql('appkit/baz');
             warnStub.thirdCall.args[0].should.containEql('Cannot find module "appkit/notfound"');
-            
+
             done();
         }, function (err) {
             done(err);
